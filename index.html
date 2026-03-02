@@ -121,12 +121,12 @@
         }
         .ip-box:hover { color: var(--gold); border-color: var(--gold); background: rgba(212, 175, 55, 0.05); }
 
-        /* STATS */
+        /* STATS BAR */
         .stats-bar { 
             display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             padding: 70px 5%; background: #050505; border-top: 1px solid var(--border); gap: 40px; text-align: center;
         }
-        .stat-item h4 { font-family: var(--gta-font); font-size: 3.8rem; color: var(--gold); }
+        .stat-item h4 { font-family: var(--gta-font); font-size: 3.8rem; color: var(--gold); min-width: 150px; }
         .stat-item p { font-family: var(--gta-sub); color: #666; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
 
         footer { 
@@ -134,9 +134,6 @@
             font-family: var(--gta-sub); font-size: 0.75rem; text-transform: uppercase;
             border-top: 1px solid #111; letter-spacing: 1px;
         }
-
-        /* MOBILE OPTIMIZATION */
-        .mobile-only { display: none; }
 
         @media (max-width: 768px) {
             .menu-toggle { display: block; }
@@ -172,12 +169,9 @@
             <li><a href="progetto.html">PROGETTO</a></li>
             <li><a href="regolamento.html">REGOLAMENTO</a></li>
             <li><a href="whitelist.html">WHITELIST</a></li>
-            <li class="mobile-only">
-                <a href="fivem://connect/1469263320417566802" class="play-btn">GIOCA ORA</a>
-            </li>
-        </ul>
+            </ul>
 
-        <a href="fivem://connect/1469263320417566802" class="play-btn desktop-only">GIOCA</a>
+        <a href="#" class="play-btn desktop-only">COMING SOON</a>
     </header>
 
     <section class="hero">
@@ -191,22 +185,22 @@
             </div>
 
             <div class="ip-area">
-                <div class="ip-box" id="copyIp">SERVER ID:COMING SOON</div>
+                <div class="ip-box" id="copyIp">COMING SOON</div>
             </div>
         </div>
     </section>
 
     <div class="stats-bar">
         <div class="stat-item">
-            <h4 id="discord-count">0</h4>
+            <h4 class="counter" data-target="750">0</h4>
             <p>Community Discord</p>
         </div>
         <div class="stat-item">
-            <h4 class="p-count">0</h4>
-            <p>Cittadini in Game</p>
+            <h4 class="counter p-count" data-target="0">0</h4>
+            <p>Players in Game</p>
         </div>
         <div class="stat-item">
-            <h4>99%</h4>
+            <h4 class="counter" data-target="99">0</h4>
             <p>Server Uptime</p>
         </div>
     </div>
@@ -227,13 +221,41 @@
 
         const SERVER_ID = "957794379186192425";
 
+        function startCounters() {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 60;
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText.replace('+', '').replace('%', '');
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        const nextVal = Math.ceil(count + inc);
+                        counter.innerText = nextVal > target ? target : nextVal;
+                        setTimeout(updateCount, 25);
+                    } else {
+                        if (counter.classList.contains('p-count')) {
+                            counter.innerText = target;
+                        } else if (target === 99) {
+                            counter.innerText = target + "%";
+                        } else {
+                            counter.innerText = target + "+";
+                        }
+                    }
+                };
+                updateCount();
+            });
+        }
+
         async function updateStats() {
             try {
                 const res = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${SERVER_ID}`);
                 if (res.ok) {
                     const data = await res.json();
-                    const p = data.Data.clients;
-                    document.querySelectorAll('.p-count').forEach(el => el.innerText = p);
+                    const p = data.Data.clients || 0;
+                    document.querySelector('.p-count').setAttribute('data-target', p);
                     document.getElementById('header-status').innerText = "SERVER ONLINE";
                     document.getElementById('header-status').style.color = "#D4AF37";
                 }
@@ -241,20 +263,13 @@
                 document.getElementById('header-status').innerText = "SERVER OFFLINE";
                 document.getElementById('header-status').style.color = "#ff4d4d";
             }
-
-            try {
-                const res = await fetch(`https://discord.com/api/guilds/${SERVER_ID}/widget.json`);
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById('discord-count').innerText = data.presence_count;
-                }
-            } catch (e) {}
+            startCounters();
         }
 
         document.getElementById('copyIp').addEventListener('click', function() {
-            navigator.clipboard.writeText("1469263320417566802");
+            navigator.clipboard.writeText("COMING SOON");
             const originalText = this.innerText;
-            this.innerText = "ID COPIATO!";
+            this.innerText = "COPIATO!";
             this.style.color = "#D4AF37";
             setTimeout(() => { 
                 this.innerText = originalText; 
@@ -263,11 +278,8 @@
         });
 
         updateStats();
-        setInterval(updateStats, 30000);
     </script>
 </body>
 </html>
-
-
 
 
